@@ -13,7 +13,13 @@
 const CLE_PARTAGEE = 'change-moi-avant-de-deployer';
 
 const ONGLETS = {
-  entites: ['id', 'type', 'nom', 'resume', 'notes', 'tags', 'maj'],
+  // Les colonnes de combat sont volontairement placées APRÈS 'maj' :
+  // relancer initialiser() sur un Sheet déjà rempli ne décale alors rien.
+  entites: [
+    'id', 'type', 'nom', 'resume', 'notes', 'tags', 'maj',
+    'niveau', 'ca', 'pv_max',
+    'force', 'dexterite', 'constitution', 'intelligence', 'sagesse', 'charisme',
+  ],
   relations: ['id', 'source', 'cible', 'type', 'note', 'maj'],
 };
 
