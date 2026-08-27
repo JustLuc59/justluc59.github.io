@@ -1,10 +1,55 @@
-<head land="en">
-  <head>
-    <title>New page!</title>
-    <meta name="viewport" content="width=device-width, ititial-scale=1.0">
-  </head>
-  <body>
-    <h1>Very cool page</h1>
-    <p>Hello world!</p>
-  </body>
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MJ Codex</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Karla:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+</head>
+<body>
+
+  <header class="barre">
+    <h1 class="marque">MJ<span>Codex</span></h1>
+    <span id="etat-demo" class="etiquette-demo" hidden>démo</span>
+    <div class="barre-actions">
+      <button class="bouton bouton--plein" id="nouvelle">Nouvelle fiche</button>
+      <button class="bouton" id="recharger">Recharger</button>
+      <button class="bouton" id="essayer">Démo</button>
+      <button class="bouton" id="ouvrir-connexion">Connexion</button>
+    </div>
+  </header>
+
+  <p id="bandeau" class="bandeau" role="status" aria-live="polite"></p>
+
+  <main class="plan">
+    <section class="panneau panneau--liste" id="panneau-liste" aria-label="Fiches"></section>
+    <section class="panneau panneau--fiche" id="panneau-fiche" aria-label="Fiche"></section>
+    <section class="panneau panneau--graphe" id="panneau-graphe" aria-label="Réseau"></section>
+  </main>
+
+  <dialog id="connexion" class="dialogue">
+    <form id="form-connexion" class="dialogue-corps">
+      <h2>Connexion au Sheet</h2>
+      <p class="indice">Ces deux valeurs restent dans ce navigateur. Elles ne sont jamais envoyées ailleurs qu’à ton Apps Script.</p>
+      <label class="etiquette">URL de déploiement
+        <input class="champ" name="url" type="url" placeholder="https://script.google.com/macros/s/…/exec" required>
+      </label>
+      <label class="etiquette">Clé partagée
+        <input class="champ" name="cle" type="password" placeholder="la valeur de CLE_PARTAGEE" required>
+      </label>
+      <div class="fiche-actions">
+        <button class="bouton bouton--plein" type="submit">Connecter</button>
+        <button class="bouton" type="button" id="fermer-connexion">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
 </html>
