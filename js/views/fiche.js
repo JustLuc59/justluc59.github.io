@@ -1,7 +1,8 @@
 /** Colonne centrale : la fiche de l'entité sélectionnée. */
 
-import { TYPES, TYPES_DE_LIEN } from '../config.js';
+import { TYPES, TYPES_DE_LIEN, CHAMPS_COMBAT, CARACS, modificateur, signe } from '../config.js';
 import * as store from '../store.js';
+import * as combat from '../combat-store.js';
 import { pastille } from './pastille.js';
 import { echapper } from './liste.js';
 
@@ -21,13 +22,16 @@ export function monterFiche(racine, { signalerErreur }) {
     }
 
     racine.innerHTML = enEdition ? gabaritFormulaire(entite) : gabaritLecture(entite);
-    enEdition ? brancherFormulaire(racine, entite) : brancherLecture(racine, entite);
+    if (enEdition) brancherFormulaire(racine, entite);
+    else brancherLecture(racine, entite);
   }
 
   // ------------------------------------------------------------- lecture
 
   function gabaritLecture(entite) {
     const liens = store.liensDe(entite.id);
+    const combattant = (TYPES[entite.type] || {}).combat;
+
     return `
       <article class="fiche">
         <header class="fiche-tete">
@@ -37,13 +41,16 @@ export function monterFiche(racine, { signalerErreur }) {
             <p class="fiche-resume">${echapper(entite.resume || '')}</p>
           </div>
           <div class="fiche-actions">
+            ${combattant ? `<button class="bouton" data-action="au-combat">Au combat</button>` : ''}
             <button class="bouton" data-action="modifier">Modifier</button>
             <button class="bouton bouton--danger" data-action="supprimer">Supprimer</button>
           </div>
         </header>
 
-        ${entite.tags ? `<p class="tags">${entite.tags.split(',').map((t) =>
+        ${entite.tags ? `<p class="tags">${entite.tags.split(',').filter((t) => t.trim()).map((t) =>
           `<span class="tag">${echapper(t.trim())}</span>`).join('')}</p>` : ''}
+
+        ${combattant ? blocCombat(entite) : ''}
 
         ${entite.notes ? `<div class="notes">${echapper(entite.notes).replace(/\n/g, '<br>')}</div>` : ''}
 
@@ -54,6 +61,29 @@ export function monterFiche(racine, { signalerErreur }) {
           ${gabaritAjoutLien(entite)}
         </section>
       </article>`;
+  }
+
+  /** Chiffres de combat + caractéristiques, affichés seulement si renseignés. */
+  function blocCombat(entite) {
+    const chiffres = CHAMPS_COMBAT.filter((c) => entite[c.cle]);
+    const caracs = CARACS.filter((c) => entite[c.cle]);
+    if (!chiffres.length && !caracs.length) return '';
+
+    return `
+      <section class="bloc-stats">
+        ${chiffres.length ? `<div class="chiffres">${chiffres.map((c) => `
+          <div class="chiffre">
+            <span class="chiffre-libelle">${c.libelle}</span>
+            <span class="chiffre-valeur">${echapper(entite[c.cle])}</span>
+          </div>`).join('')}</div>` : ''}
+
+        ${caracs.length ? `<div class="caracs">${caracs.map((c) => `
+          <div class="carac">
+            <span class="carac-libelle">${c.libelle}</span>
+            <span class="carac-score">${echapper(entite[c.cle])}</span>
+            <span class="carac-mod">${signe(modificateur(entite[c.cle]))}</span>
+          </div>`).join('')}</div>` : ''}
+      </section>`;
   }
 
   function ligneDeLien({ relation, sens, autre }) {
@@ -101,6 +131,12 @@ export function monterFiche(racine, { signalerErreur }) {
       await protege(() => store.supprimerEntite(entite.id));
     };
 
+    const auCombat = racine.querySelector('[data-action="au-combat"]');
+    if (auCombat) auCombat.onclick = () => {
+      combat.ajouterDepuisFiche(entite, 1);
+      combat.ouvrir();
+    };
+
     racine.querySelectorAll('[data-aller]').forEach((bouton) => {
       bouton.onclick = () => store.selectionner(bouton.dataset.aller);
     });
@@ -127,13 +163,15 @@ export function monterFiche(racine, { signalerErreur }) {
   // ------------------------------------------------------------- édition
 
   function gabaritFormulaire(entite) {
+    const combattant = (TYPES[entite.type] || {}).combat;
+
     return `
       <form class="fiche fiche--formulaire" data-form="entite">
         <label class="etiquette">Nom
           <input class="champ" name="nom" value="${echapper(entite.nom || '')}" required autofocus>
         </label>
-        <label class="etiquette">Type
-          <select class="champ" name="type">
+        <label class="etiquette">Type <span class="indice">change le type pour faire apparaître les caractéristiques</span>
+          <select class="champ" name="type" data-recharge>
             ${Object.entries(TYPES).map(([cle, t]) =>
               `<option value="${cle}" ${cle === entite.type ? 'selected' : ''}>${t.libelle}</option>`).join('')}
           </select>
@@ -144,6 +182,26 @@ export function monterFiche(racine, { signalerErreur }) {
         <label class="etiquette">Tags <span class="indice">séparés par des virgules</span>
           <input class="champ" name="tags" value="${echapper(entite.tags || '')}">
         </label>
+
+        ${combattant ? `
+          <fieldset class="groupe">
+            <legend class="registre-titre">Combat</legend>
+            <div class="grille-saisie">
+              ${CHAMPS_COMBAT.map((c) => `
+                <label class="etiquette etiquette--serree">${c.libelle}
+                  <input class="champ" name="${c.cle}" type="number" value="${echapper(entite[c.cle] || '')}">
+                </label>`).join('')}
+            </div>
+            <div class="grille-saisie grille-saisie--six">
+              ${CARACS.map((c) => `
+                <label class="etiquette etiquette--serree">${c.libelle}
+                  <input class="champ" name="${c.cle}" type="number" min="1" max="30"
+                         value="${echapper(entite[c.cle] || '')}" data-carac>
+                  <span class="carac-mod carac-mod--apercu">${signe(modificateur(entite[c.cle]))}</span>
+                </label>`).join('')}
+            </div>
+          </fieldset>` : ''}
+
         <label class="etiquette">Notes
           <textarea class="champ champ--zone" name="notes" rows="10">${echapper(entite.notes || '')}</textarea>
         </label>
@@ -161,6 +219,21 @@ export function monterFiche(racine, { signalerErreur }) {
       enEdition = false;
       rendre(store.lire());
     };
+
+    // Changer le type fait apparaître ou disparaître le bloc Combat, sans enregistrer.
+    formulaire.querySelector('[data-recharge]').onchange = (e) => {
+      const brouillon = { ...entite, ...Object.fromEntries(new FormData(formulaire)), type: e.target.value };
+      racine.innerHTML = gabaritFormulaire(brouillon);
+      brancherFormulaire(racine, brouillon);
+    };
+
+    // Le modificateur se met à jour pendant la saisie.
+    formulaire.querySelectorAll('[data-carac]').forEach((champ) => {
+      champ.oninput = () => {
+        champ.parentElement.querySelector('.carac-mod--apercu').textContent =
+          signe(modificateur(champ.value));
+      };
+    });
 
     formulaire.onsubmit = async (e) => {
       e.preventDefault();
