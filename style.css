@@ -1,0 +1,327 @@
+/* ---------------------------------------------------------------
+   MJ Codex — feuille de style unique.
+   Change les valeurs de :root pour reteinter toute l'appli.
+   --------------------------------------------------------------- */
+
+:root {
+  --fond: #1B2027;
+  --panneau: #232A33;
+  --creux: #1F252D;
+  --trait: #38414D;
+  --encre: #E4E7EB;
+  --sourd: #8E99A6;
+  --laiton: #C9A227;
+  --cire: #B2453C;
+
+  --display: 'Fraunces', Georgia, serif;
+  --corps: 'Karla', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --rayon: 4px;
+  --pas: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--corps);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+:focus-visible { outline: 2px solid var(--laiton); outline-offset: 2px; }
+
+/* --------------------------------------------------------------- barre */
+
+.barre {
+  display: flex;
+  align-items: center;
+  gap: var(--pas);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--trait);
+  background: var(--creux);
+}
+
+.marque {
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  font-variation-settings: 'SOFT' 20, 'WONK' 1;
+}
+.marque span { color: var(--laiton); }
+
+.barre-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+.etiquette-demo {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fond);
+  background: var(--laiton);
+  padding: 2px 6px;
+  border-radius: var(--rayon);
+}
+
+.bandeau { margin: 0; padding: 0 16px; font-size: 13px; }
+.bandeau:empty { display: none; }
+.bandeau--erreur { color: var(--fond); background: var(--cire); padding: 8px 16px; }
+.bandeau--info { color: var(--sourd); padding: 8px 16px; }
+
+/* --------------------------------------------------------------- plan */
+
+.plan {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 400px;
+}
+
+.panneau { min-height: 0; overflow: auto; }
+.panneau--liste { border-right: 1px solid var(--trait); background: var(--creux); display: flex; flex-direction: column; }
+.panneau--fiche { padding: 20px 24px 40px; }
+.panneau--graphe { border-left: 1px solid var(--trait); overflow: hidden; }
+
+/* --------------------------------------------------------------- champs */
+
+.champ {
+  width: 100%;
+  background: var(--fond);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 7px 9px;
+}
+.champ--zone { resize: vertical; font-family: var(--corps); line-height: 1.6; }
+
+.etiquette {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sourd);
+}
+.etiquette .champ { margin-top: 5px; text-transform: none; letter-spacing: normal; color: var(--encre); font-size: 14px; }
+
+.indice { text-transform: none; letter-spacing: normal; color: var(--sourd); font-size: 12px; }
+
+.bouton {
+  background: transparent;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 6px 11px;
+  cursor: pointer;
+  color: var(--encre);
+}
+.bouton:hover { border-color: var(--sourd); }
+.bouton--plein { background: var(--laiton); border-color: var(--laiton); color: var(--fond); font-weight: 600; }
+.bouton--plein:hover { filter: brightness(1.1); }
+.bouton--danger:hover { border-color: var(--cire); color: var(--cire); }
+
+/* --------------------------------------------------------------- liste */
+
+.liste-tete { padding: 12px; border-bottom: 1px solid var(--trait); }
+
+.filtres { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.filtre {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--rayon);
+  padding: 3px 7px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--sourd);
+}
+.filtre:hover { color: var(--encre); }
+.filtre[aria-pressed='true'] { color: var(--fond); background: var(--encre); }
+
+.liste { list-style: none; margin: 0; padding: 0; overflow: auto; }
+
+.ligne {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--trait);
+  cursor: pointer;
+}
+.ligne:hover { background: var(--panneau); }
+.ligne--active { background: var(--panneau); box-shadow: inset 3px 0 0 var(--laiton); }
+
+.ligne-texte { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.ligne-nom { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ligne-resume { font-size: 12px; color: var(--sourd); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ligne-liens { font-family: var(--mono); font-size: 11px; color: var(--sourd); }
+
+.vide { padding: 16px 12px; color: var(--sourd); font-size: 13px; }
+.vide--grand { display: grid; place-items: center; height: 100%; text-align: center; }
+
+/* --------------------------------------------------------------- pastille */
+
+.pastille {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--teinte) 22%, transparent);
+  color: var(--teinte);
+  border: 1px solid color-mix(in srgb, var(--teinte) 55%, transparent);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------- fiche */
+
+.fiche { max-width: 680px; }
+
+.fiche-tete { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.fiche-tete .pastille { width: 30px; height: 30px; font-size: 14px; margin-top: 3px; }
+
+.fiche-nom { font-size: 26px; font-variation-settings: 'SOFT' 20, 'WONK' 1; line-height: 1.15; }
+.fiche-resume { margin: 3px 0 0; color: var(--sourd); }
+.fiche-actions { display: flex; gap: 8px; margin-left: auto; flex: none; }
+.fiche--formulaire .fiche-actions { margin-left: 0; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 16px; }
+.tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--sourd);
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.notes {
+  background: var(--panneau);
+  border-left: 2px solid var(--trait);
+  padding: 14px 16px;
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  line-height: 1.7;
+}
+
+/* --------------------------------------- registre des liens (élément signature) */
+
+.registre { margin-top: 28px; }
+
+.registre-titre {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--sourd);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--trait);
+  display: flex;
+  gap: 8px;
+}
+.compte { color: var(--laiton); }
+
+.registre-liste { list-style: none; margin: 0; padding: 0; }
+
+.lien {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px dotted var(--trait);
+}
+
+/* Le type de lien est en mono, aligné en colonne : la fiche se lit comme un registre. */
+.lien-type {
+  flex: none;
+  width: 170px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--laiton);
+}
+.lien--entrant .lien-type { color: var(--sourd); text-align: right; }
+
+.lien-cible {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: left;
+}
+.lien-cible:hover span { text-decoration: underline; }
+.lien-cible .pastille { width: 18px; height: 18px; font-size: 10px; }
+
+.lien-note { font-size: 12px; color: var(--sourd); font-style: italic; }
+
+.lien-retirer {
+  margin-left: auto;
+  background: none;
+  border: 0;
+  color: var(--sourd);
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  padding: 0 4px;
+  opacity: 0;
+}
+.lien:hover .lien-retirer, .lien-retirer:focus-visible { opacity: 1; }
+.lien-retirer:hover { color: var(--cire); }
+
+.ajout-lien {
+  display: grid;
+  grid-template-columns: 170px 1fr 1fr auto;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* --------------------------------------------------------------- dialogue */
+
+.dialogue {
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--panneau);
+  color: var(--encre);
+  padding: 0;
+  width: min(460px, 92vw);
+}
+.dialogue::backdrop { background: rgba(12, 15, 19, 0.7); }
+.dialogue-corps { padding: 20px 22px; }
+.dialogue-corps h2 { font-size: 19px; margin-bottom: 4px; }
+.dialogue-corps .indice { display: block; margin-bottom: 16px; }
+
+/* --------------------------------------------------------------- écrans étroits */
+
+@media (max-width: 1100px) {
+  .plan { grid-template-columns: 260px minmax(0, 1fr); }
+  .panneau--graphe { display: none; }
+}
+
+@media (max-width: 780px) {
+  .plan { grid-template-columns: 1fr; grid-template-rows: 200px minmax(0, 1fr); }
+  .panneau--liste { border-right: 0; border-bottom: 1px solid var(--trait); }
+  .panneau--fiche { padding: 16px; }
+  .fiche-tete { flex-wrap: wrap; }
+  .fiche-actions { margin-left: 0; width: 100%; }
+  .lien { flex-wrap: wrap; }
+  .lien-type { width: auto; }
+  .ajout-lien { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
