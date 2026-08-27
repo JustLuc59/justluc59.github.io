@@ -19,6 +19,7 @@
     <span id="etat-demo" class="etiquette-demo" hidden>démo</span>
     <div class="barre-actions">
       <button class="bouton bouton--plein" id="nouvelle">Nouvelle fiche</button>
+      <button class="bouton" id="combat">Combat <span id="combat-compte" class="marque-compte" hidden></span></button>
       <button class="bouton" id="recharger">Recharger</button>
       <button class="bouton" id="essayer">Démo</button>
       <button class="bouton" id="ouvrir-connexion">Connexion</button>
@@ -32,6 +33,8 @@
     <section class="panneau panneau--fiche" id="panneau-fiche" aria-label="Fiche"></section>
     <section class="panneau panneau--graphe" id="panneau-graphe" aria-label="Réseau"></section>
   </main>
+
+  <section class="combat" id="panneau-combat" aria-label="Combat en cours" hidden></section>
 
   <dialog id="connexion" class="dialogue">
     <form id="form-connexion" class="dialogue-corps">
