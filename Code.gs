@@ -5,7 +5,7 @@
  * Voir README.md pour les étapes de déploiement.
  *
  * Le Sheet contient 2 onglets, créés automatiquement par initialiser() :
- *   entites   : id | type | nom | resume | notes | tags | maj
+ *   entites   : id | type | nom | resume | notes | tags | maj | … (voir ONGLETS)
  *   relations : id | source | cible | type | note | maj
  */
 
@@ -19,6 +19,15 @@ const ONGLETS = {
     'id', 'type', 'nom', 'resume', 'notes', 'tags', 'maj',
     'niveau', 'ca', 'pv_max',
     'force', 'dexterite', 'constitution', 'intelligence', 'sagesse', 'charisme',
+    // Vilains
+    'menace', 'statut', 'plan', 'portrait',
+    // Rencontres : "idMonstre:nb;idMonstre:nb"
+    'composition',
+    // Stat block
+    'taille', 'categorie', 'alignement', 'pv_des', 'vitesse', 'jets_sauvegarde',
+    'competences', 'sens', 'langues', 'resistances', 'immunites', 'vulnerabilites',
+    'immunites_etats', 'capacites', 'actions', 'actions_bonus', 'reactions',
+    'actions_legendaires',
   ],
   relations: ['id', 'source', 'cible', 'type', 'note', 'maj'],
 };

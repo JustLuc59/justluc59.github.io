@@ -19,6 +19,8 @@
     <span id="etat-demo" class="etiquette-demo" hidden>démo</span>
     <div class="barre-actions">
       <button class="bouton bouton--plein" id="nouvelle">Nouvelle fiche</button>
+      <button class="bouton" id="importer">Importer</button>
+      <button class="bouton" id="vilains">Vilains <span id="vilains-compte" class="marque-compte" hidden></span></button>
       <button class="bouton" id="combat">Combat <span id="combat-compte" class="marque-compte" hidden></span></button>
       <button class="bouton" id="recharger">Recharger</button>
       <button class="bouton" id="essayer">Démo</button>
@@ -35,6 +37,23 @@
   </main>
 
   <section class="combat" id="panneau-combat" aria-label="Combat en cours" hidden></section>
+  <section class="combat" id="panneau-vilains" aria-label="Registre des vilains" hidden></section>
+
+  <dialog id="import" class="dialogue dialogue--large">
+    <form id="form-import" class="dialogue-corps">
+      <h2>Importer un stat block</h2>
+      <p class="indice">Colle un bloc du SRD (français ou anglais) ou tes propres notes. La fiche Monstre s’ouvre en édition pour vérifier.</p>
+      <textarea class="champ champ--zone champ--mono" name="texte" rows="16" placeholder="Gobelin
+Humanoïde (gobelinoïde) de taille P, neutre mauvais
+Classe d'armure 15 (armure de cuir, bouclier)
+Points de vie 7 (2d6)
+…" required></textarea>
+      <div class="fiche-actions">
+        <button class="bouton bouton--plein" type="submit">Créer la fiche</button>
+        <button class="bouton" type="button" id="fermer-import">Fermer</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="connexion" class="dialogue">
     <form id="form-connexion" class="dialogue-corps">

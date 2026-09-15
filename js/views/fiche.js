@@ -5,6 +5,8 @@ import * as store from '../store.js';
 import * as combat from '../combat-store.js';
 import { pastille } from './pastille.js';
 import { echapper } from './liste.js';
+import { blocVilain, blocStatBloc, portrait, badgeRang, formulaireVilain, formulaireStatBloc } from './statbloc.js';
+import { blocRencontre, brancherLectureRencontre, formulaireRencontre, brancherFormulaireRencontre } from './rencontre.js';
 
 let enEdition = false;
 
@@ -35,9 +37,9 @@ export function monterFiche(racine, { signalerErreur }) {
     return `
       <article class="fiche">
         <header class="fiche-tete">
-          ${pastille(entite.type)}
+          ${entite.portrait ? portrait(entite) : pastille(entite.type)}
           <div>
-            <h2 class="fiche-nom">${echapper(entite.nom || 'Sans nom')}</h2>
+            <h2 class="fiche-nom">${echapper(entite.nom || 'Sans nom')} ${badgeRang(entite)}</h2>
             <p class="fiche-resume">${echapper(entite.resume || '')}</p>
           </div>
           <div class="fiche-actions">
@@ -50,7 +52,10 @@ export function monterFiche(racine, { signalerErreur }) {
         ${entite.tags ? `<p class="tags">${entite.tags.split(',').filter((t) => t.trim()).map((t) =>
           `<span class="tag">${echapper(t.trim())}</span>`).join('')}</p>` : ''}
 
+        ${combattant ? blocVilain(entite) : ''}
         ${combattant ? blocCombat(entite) : ''}
+        ${combattant ? blocStatBloc(entite) : ''}
+        ${entite.type === 'rencontre' ? blocRencontre(entite) : ''}
 
         ${entite.notes ? `<div class="notes">${echapper(entite.notes).replace(/\n/g, '<br>')}</div>` : ''}
 
@@ -141,6 +146,8 @@ export function monterFiche(racine, { signalerErreur }) {
       bouton.onclick = () => store.selectionner(bouton.dataset.aller);
     });
 
+    brancherLectureRencontre(racine, entite, signalerErreur);
+
     racine.querySelectorAll('[data-retirer]').forEach((bouton) => {
       bouton.onclick = () => protege(() => store.supprimerRelation(bouton.dataset.retirer));
     });
@@ -189,7 +196,7 @@ export function monterFiche(racine, { signalerErreur }) {
             <div class="grille-saisie">
               ${CHAMPS_COMBAT.map((c) => `
                 <label class="etiquette etiquette--serree">${c.libelle}
-                  <input class="champ" name="${c.cle}" type="number" value="${echapper(entite[c.cle] || '')}">
+                  <input class="champ" name="${c.cle}" type="${c.texte ? 'text' : 'number'}" value="${echapper(entite[c.cle] || '')}">
                 </label>`).join('')}
             </div>
             <div class="grille-saisie grille-saisie--six">
@@ -200,7 +207,11 @@ export function monterFiche(racine, { signalerErreur }) {
                   <span class="carac-mod carac-mod--apercu">${signe(modificateur(entite[c.cle]))}</span>
                 </label>`).join('')}
             </div>
-          </fieldset>` : ''}
+          </fieldset>
+          ${formulaireVilain(entite)}
+          ${formulaireStatBloc(entite)}` : ''}
+
+        ${entite.type === 'rencontre' ? formulaireRencontre(entite) : ''}
 
         <label class="etiquette">Notes
           <textarea class="champ champ--zone" name="notes" rows="10">${echapper(entite.notes || '')}</textarea>
@@ -226,6 +237,8 @@ export function monterFiche(racine, { signalerErreur }) {
       racine.innerHTML = gabaritFormulaire(brouillon);
       brancherFormulaire(racine, brouillon);
     };
+
+    brancherFormulaireRencontre(formulaire);
 
     // Le modificateur se met à jour pendant la saisie.
     formulaire.querySelectorAll('[data-carac]').forEach((champ) => {

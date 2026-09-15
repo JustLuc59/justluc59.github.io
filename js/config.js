@@ -18,6 +18,7 @@ export const TYPES = {
   objet:   { libelle: 'Objet',    sigle: 'O', couleur: '#8E7CC3' },
   quete:   { libelle: 'Quête',    sigle: 'Q', couleur: '#7FA65C' },
   session: { libelle: 'Session',  sigle: 'S', couleur: '#8E99A6' },
+  rencontre: { libelle: 'Rencontre', sigle: 'R', couleur: '#C25E9A' },
 };
 
 /** Suggestions proposées dans le champ « type de lien ». Le champ reste libre. */
@@ -32,16 +33,66 @@ export const TYPES_DE_LIEN = [
   'rencontré par',
   'quête donnée par',
   'apparaît en',
+  'sbire de',
+  'lieutenant de',
+  'sert',
 ];
+
+/**
+ * Types de lien qui font d'une fiche le sbire d'une autre. Le registre des
+ * vilains les utilise pour compter et lister le réseau de chaque antagoniste.
+ */
+export const LIENS_SBIRE = ['sbire de', 'lieutenant de', 'sert'];
+
+/**
+ * Rangs de menace. Une fiche PNJ ou Monstre qui porte un rang entre dans le
+ * registre des vilains. L'ordre de la liste est l'ordre d'affichage.
+ */
+export const RANGS_MENACE = [
+  { cle: 'sbire',      libelle: 'Sbire',      couleur: '#8E99A6' },
+  { cle: 'lieutenant', libelle: 'Lieutenant', couleur: '#D98E4A' },
+  { cle: 'nemesis',    libelle: 'Némésis',    couleur: '#B2453C' },
+  { cle: 'seigneur',   libelle: 'Seigneur',   couleur: '#C9A227' },
+];
+
+/** Statuts d'un vilain. « vaincu » et « mort » grisent la carte. */
+export const STATUTS_VILAIN = ['actif', 'en fuite', 'capturé', 'vaincu', 'mort'];
+export const STATUTS_TERMINES = ['vaincu', 'mort'];
 
 /**
  * Chiffres de combat. Pour en ajouter un, mets-le ici ET dans
  * `ONGLETS.entites` de Code.gs, puis relance `initialiser()`.
  */
 export const CHAMPS_COMBAT = [
-  { cle: 'niveau', libelle: 'Niveau / FP' },
+  { cle: 'niveau', libelle: 'Niveau / FP', texte: true }, // texte : accepte « 1/4 »
   { cle: 'ca',     libelle: 'CA' },
   { cle: 'pv_max', libelle: 'PV max' },
+];
+
+/**
+ * Bloc de statistiques complet (façon SRD). Rempli par l'import de stat block,
+ * modifiable à la main. `zone: true` = texte long sur plusieurs lignes.
+ * Chaque clé doit aussi exister dans `ONGLETS.entites` de Code.gs.
+ */
+export const CHAMPS_STATBLOC = [
+  { cle: 'taille',            libelle: 'Taille' },
+  { cle: 'categorie',         libelle: 'Type de créature' },
+  { cle: 'alignement',        libelle: 'Alignement' },
+  { cle: 'pv_des',            libelle: 'Dés de vie' },
+  { cle: 'vitesse',           libelle: 'Vitesse' },
+  { cle: 'jets_sauvegarde',   libelle: 'Jets de sauvegarde' },
+  { cle: 'competences',       libelle: 'Compétences' },
+  { cle: 'sens',              libelle: 'Sens' },
+  { cle: 'langues',           libelle: 'Langues' },
+  { cle: 'resistances',       libelle: 'Résistances aux dégâts' },
+  { cle: 'immunites',         libelle: 'Immunités aux dégâts' },
+  { cle: 'vulnerabilites',    libelle: 'Vulnérabilités aux dégâts' },
+  { cle: 'immunites_etats',   libelle: 'Immunités contre les états' },
+  { cle: 'capacites',         libelle: 'Capacités',          zone: true },
+  { cle: 'actions',           libelle: 'Actions',            zone: true },
+  { cle: 'actions_bonus',     libelle: 'Actions bonus',      zone: true },
+  { cle: 'reactions',         libelle: 'Réactions',          zone: true },
+  { cle: 'actions_legendaires', libelle: 'Actions légendaires', zone: true },
 ];
 
 /** Caractéristiques. Le modificateur est calculé, jamais saisi. */

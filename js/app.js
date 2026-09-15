@@ -9,6 +9,8 @@ import { monterFiche, passerEnEdition } from './views/fiche.js';
 import { monterGraphe } from './views/graphe.js';
 import { monterCombat } from './views/combat.js';
 import * as combat from './combat-store.js';
+import { monterVilains, ouvrirVilains, fermerVilains, registreOuvert, listerVilains } from './views/vilains.js';
+import { lireStatBloc } from './statbloc.js';
 
 const bandeau = document.querySelector('#bandeau');
 const dialogue = document.querySelector('#connexion');
@@ -19,6 +21,7 @@ monterGraphe(document.querySelector('#panneau-graphe'));
 
 combat.restaurer();
 monterCombat(document.querySelector('#panneau-combat'));
+monterVilains(document.querySelector('#panneau-vilains'));
 
 // ------------------------------------------------------------- barre du haut
 
@@ -33,13 +36,38 @@ document.querySelector('#nouvelle').onclick = async () => {
   }
 };
 
-document.querySelector('#combat').onclick = () => combat.ouvrir();
+document.querySelector('#combat').onclick = () => { fermerVilains(); combat.ouvrir(); };
+document.querySelector('#vilains').onclick = () => { combat.fermer(); ouvrirVilains(); };
+document.querySelector('#importer').onclick = () => dialogueImport.showModal();
 document.querySelector('#recharger').onclick = () => rafraichir();
 document.querySelector('#ouvrir-connexion').onclick = () => ouvrirConnexion();
 document.querySelector('#essayer').onclick = () => {
   store.chargerDemo(structuredClone(DEMO));
   annoncer('Mode démo : rien n’est envoyé au Sheet.', 'info');
 };
+
+// ------------------------------------------------------------- import de stat block
+
+const dialogueImport = document.querySelector('#import');
+const formulaireImport = document.querySelector('#form-import');
+
+formulaireImport.onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const fiche = lireStatBloc(formulaireImport.texte.value);
+    if (!fiche.nom) throw new Error('Impossible de lire un nom sur la première ligne.');
+    await store.enregistrerEntite(fiche);
+    passerEnEdition();
+    store.selectionner(store.lire().selection);
+    formulaireImport.reset();
+    dialogueImport.close();
+    annoncer('Fiche créée depuis le stat block. Vérifie et enregistre.', 'info');
+  } catch (err) {
+    annoncer(err.message);
+  }
+};
+
+document.querySelector('#fermer-import').onclick = () => dialogueImport.close();
 
 // ------------------------------------------------------------- connexion
 
@@ -85,9 +113,13 @@ function annoncer(message, ton = 'erreur') {
   bandeau.className = message ? `bandeau bandeau--${ton}` : 'bandeau';
 }
 
-// Indique le mode démo dans la barre, en continu.
+// Indique le mode démo et le nombre de vilains dans la barre, en continu.
 store.abonner((etat) => {
   document.querySelector('#etat-demo').hidden = !etat.demo;
+  const marque = document.querySelector('#vilains-compte');
+  const nb = listerVilains().length;
+  marque.hidden = !nb;
+  marque.textContent = nb;
 });
 
 // Le nombre de combattants s'affiche sur le bouton Combat.
@@ -103,6 +135,9 @@ document.addEventListener('keydown', (e) => {
   const saisie = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
   if (e.code === 'Space' && !saisie) { e.preventDefault(); combat.suivant(); }
   if (e.key === 'Escape') combat.fermer();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && registreOuvert()) fermerVilains();
 });
 
 rafraichir();

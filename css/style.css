@@ -459,7 +459,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .etats-actifs { display: flex; gap: 4px; flex-wrap: wrap; }
 .etats-choix { flex-basis: 100%; display: flex; gap: 4px; flex-wrap: wrap; padding: 8px 0 2px; }
 .tag--actif { background: var(--laiton); border-color: var(--laiton); color: var(--fond); }
-button.tag { cursor: pointer; }
+button.tag { cursor: pointer; background: transparent; }
 
 .combat-ajout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 22px 20px; }
 .combat-ajout .registre-titre { margin-bottom: 10px; }
@@ -471,4 +471,156 @@ button.tag { cursor: pointer; }
   .combattant { gap: 8px; }
   .combattant-identite { min-width: 140px; }
   .rangee { flex-wrap: wrap; }
+}
+
+/* ---------------------------------------------------------------
+   Vilains, stat block, rencontres
+   --------------------------------------------------------------- */
+
+.portrait {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: var(--rayon);
+  border: 1px solid var(--trait);
+}
+
+.rang {
+  display: inline-block;
+  vertical-align: middle;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: var(--teinte);
+  background: color-mix(in srgb, var(--teinte) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--teinte) 55%, transparent);
+}
+.fiche-nom .rang { margin-left: 8px; }
+
+.statut {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--sourd);
+  padding: 2px 7px;
+  border: 1px dashed var(--trait);
+  border-radius: 999px;
+}
+.statut--actif { color: #7FA65C; border-color: #7FA65C; }
+.statut--en-fuite { color: #D98E4A; border-color: #D98E4A; }
+.statut--vaincu, .statut--mort { color: var(--sourd); text-decoration: line-through; }
+
+.bloc-vilain {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--laiton);
+  background: var(--creux);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+}
+.bloc-vilain--termine { opacity: 0.6; border-left-color: var(--trait); }
+.bloc-vilain-tete { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.bloc-vilain-tete:empty { display: none; }
+.vilain-plan { margin: 10px 0 0; line-height: 1.55; }
+.plan-libelle {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--sourd);
+  margin-bottom: 3px;
+}
+.sbires { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.sbires .plan-libelle { width: 100%; }
+
+/* stat block */
+
+.statbloc { margin: 0 0 18px; }
+.statbloc-lignes { margin: 0 0 10px; padding: 10px 14px; border: 1px solid var(--trait); border-radius: var(--rayon); }
+.statbloc-ligne { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 3px 0; font-size: 13px; }
+.statbloc-ligne dt { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sourd); padding-top: 3px; }
+.statbloc-ligne dd { margin: 0; }
+.statbloc-zone { margin-top: 12px; }
+.statbloc-zone .registre-titre { margin-bottom: 6px; }
+.statbloc-para { margin: 0 0 6px; line-height: 1.55; font-size: 13.5px; }
+.statbloc-para strong { color: var(--laiton); font-weight: 600; }
+
+.groupe--pliable summary { cursor: pointer; list-style: none; }
+.groupe--pliable summary::before { content: '▸ '; color: var(--sourd); }
+.groupe--pliable[open] summary::before { content: '▾ '; }
+.champ--mono { font-family: var(--mono); font-size: 12.5px; }
+.dialogue--large { width: min(720px, 94vw); }
+
+/* rencontres */
+
+.rencontre-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 13.5px; }
+.rencontre-table th { text-align: left; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sourd); padding: 4px 8px; border-bottom: 1px solid var(--trait); }
+.rencontre-table td { padding: 6px 8px; border-bottom: 1px solid var(--trait); }
+.rencontre-table th:not(:first-child), .rencontre-table td:not(:first-child) { text-align: right; width: 70px; }
+.mono { font-family: var(--mono); }
+
+.bilan {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch;
+  padding: 10px 12px; border: 1px solid var(--trait); border-radius: var(--rayon);
+  border-left-width: 3px; margin-top: 12px;
+}
+.bilan .chiffre { min-width: 110px; }
+.bilan .chiffre-valeur { text-transform: capitalize; }
+.bilan-groupe { width: 100%; margin: 4px 0 0; }
+.bilan--triviale { border-left-color: var(--sourd); }
+.bilan--facile { border-left-color: #7FA65C; }
+.bilan--moyenne { border-left-color: var(--laiton); }
+.bilan--difficile { border-left-color: #D98E4A; }
+.bilan--mortelle { border-left-color: var(--cire); }
+.bilan--mortelle .chiffre:first-child .chiffre-valeur { color: var(--cire); }
+
+.rangees { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.rangee--composition { display: flex; gap: 6px; align-items: center; }
+.rangee--composition .lien-retirer { opacity: 1; }
+
+/* registre des vilains */
+
+.registre-grand-titre { font-size: 22px; font-variation-settings: 'SOFT' 20, 'WONK' 1; }
+
+.cartes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  padding: 18px 20px 40px;
+}
+
+.carte {
+  display: flex;
+  flex-direction: column;
+  background: var(--panneau);
+  border: 1px solid var(--trait);
+  border-top: 3px solid var(--teinte);
+  border-radius: var(--rayon);
+  overflow: hidden;
+}
+.carte--termine { opacity: 0.5; filter: grayscale(0.6); }
+
+.carte-visuel { position: relative; height: 120px; background: var(--creux); display: grid; place-items: center; }
+.carte-portrait { width: 100%; height: 100%; object-fit: cover; }
+.carte-pastille .pastille { width: 44px; height: 44px; font-size: 20px; }
+.carte-visuel .rang { position: absolute; top: 8px; left: 8px; background: var(--fond); }
+
+.carte-corps { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.carte-nom { font-size: 18px; font-variation-settings: 'SOFT' 20, 'WONK' 1; }
+.carte-nom .lien-fiche { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.carte-resume { margin: -4px 0 0; color: var(--sourd); font-size: 12.5px; }
+.carte-chiffres { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.carte-chiffres .ca { width: auto; }
+.carte-plan { margin: 0; font-size: 13px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.carte-sbires { margin: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.carte-sbires .plan-libelle { width: 100%; }
+.carte-sbires .tag { cursor: pointer; }
+
+@media (max-width: 780px) {
+  .statbloc-ligne { grid-template-columns: 1fr; gap: 2px; }
+  .cartes { grid-template-columns: 1fr; padding: 12px; }
 }
