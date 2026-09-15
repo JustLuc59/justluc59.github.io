@@ -36,7 +36,9 @@ Le bouton **Démo** charge un jeu d'exemple en mémoire pour essayer sans rien b
 - Fiches typées : PNJ, monstre, joueur, lieu, faction, objet, quête, session, rencontre
 - Liens orientés et nommés entre fiches (« habite à », « membre de »…), visibles des deux côtés
 - Recherche plein texte, filtres par type
-- Graphe du réseau, avec mise en avant des voisins de la fiche ouverte
+- **Page Graphe** : la carte mentale en plein écran, filtres par type, recherche d'un nœud, volet de lecture ; double-clic sur un nœud ouvre la fiche dans le codex
+- **Page Sorts** : les 319 sorts du SRD 5.1 en français, filtrables par niveau, classe, école, concentration, rituel — plus tes sorts maison dans `data/sorts-perso.json`
+- Depuis le tracker de combat, « Chercher un sort » affiche la fiche d'un sort sans quitter la bagarre
 - Tracker de combat : initiative, PV, états, tours
 - **Registre des vilains** : toute fiche PNJ ou Monstre qui porte un rang de menace (sbire, lieutenant, némésis, seigneur) apparaît en carte, avec statut, plan en cours et réseau de sbires (liens « sbire de », « lieutenant de », « sert »)
 - **Import de stat block** : colle un bloc du SRD (français ou anglais), la fiche Monstre se remplit — CA, PV, caracs, sens, capacités, actions… — et s'ouvre en édition
@@ -46,6 +48,7 @@ Le bouton **Démo** charge un jeu d'exemple en mémoire pour essayer sans rien b
 
 - **Vilain** : ouvre un PNJ ou un Monstre → Modifier → bloc « Vilain » → choisis un rang. Relie ses sbires avec un lien « sbire de » ou « sert » vers lui : ils apparaissent sur sa carte.
 - **Import** : bouton Importer, colle le stat block, Créer la fiche. Ce qui n'est pas reconnu finit dans « Capacités » — corrige puis Enregistrer.
+- **Sort maison** : ouvre `data/sorts-perso.json`, copie l'exemple, remplis-le. Le fichier est lu à chaque chargement, aucun redéploiement du Sheet n'est nécessaire.
 - **Rencontre** : Nouvelle fiche → type Rencontre → Modifier. La difficulté n'apparaît que si tes fiches Joueur ont un niveau. « Lancer le combat » ajoute les monstres et les joueurs au tracker.
 
 ## Où modifier quoi
@@ -64,6 +67,11 @@ Le bouton **Démo** charge un jeu d'exemple en mémoire pour essayer sans rien b
 | Modifier le registre des vilains | `js/views/vilains.js` |
 | Modifier le constructeur de rencontres | `js/views/rencontre.js` |
 | Modifier le tracker | `js/views/combat.js` et `js/combat-store.js` |
+| Ajouter un sort maison | `data/sorts-perso.json` |
+| Changer la barre du haut, la navigation, la connexion | `js/mj.js` |
+| Ajouter une page | `js/mj.js` → `PAGES`, puis `mapage.html` + `js/pages/mapage.js` sur le modèle de `sorts.html` |
+| Modifier la page Graphe (filtres, volet) | `js/pages/graphe.js` ; le dessin lui-même est dans `js/views/graphe.js` |
+| Modifier la bibliothèque de sorts | `js/sorts-store.js` (recherche) et `js/views/sorts.js` (affichage) |
 | Modifier la liste de gauche | `js/views/liste.js` |
 | Modifier le graphe | `js/views/graphe.js` |
 | Ajouter une action serveur | `Code.gs` → `ACTIONS` |
@@ -75,21 +83,39 @@ Après toute modification de `Code.gs`, il faut **redéployer** (Déployer → G
 ## Comment c'est organisé
 
 ```
-index.html          structure de la page
+index.html          page Codex   →  js/pages/codex.js
+graphe.html         page Graphe  →  js/pages/graphe.js
+sorts.html          page Sorts   →  js/pages/sorts.js
 css/style.css       tout le style
-js/config.js        réglages : types, liens, connexion
+data/sorts.json     le SRD 5.1 (remplacé lors d'une mise à jour, ne pas éditer)
+data/sorts-perso.json  tes sorts, jamais écrasé
+js/mj.js            coquille commune : barre, navigation, connexion, combat, démo
+js/config.js        réglages : types, liens, rangs, champs
 js/api.js           appels réseau vers Apps Script
 js/store.js         état central — seul endroit qui modifie les données
 js/combat-store.js  état du combat en cours (jamais écrit dans le Sheet)
+js/sorts-store.js   bibliothèque de sorts (lecture des JSON, recherche)
 js/regles.js        tables 5e : PX par FP, seuils, difficulté — fonctions pures
 js/statbloc.js      lecture d'un stat block collé → objet fiche — fonction pure
+js/pages/           un fichier par page : appelle demarrerMJ() puis monte ses panneaux
 js/views/           une vue par fichier, chacune s'abonne au store
   fiche.js            la fiche ; délègue à statbloc.js (vilain, stats) et rencontre.js
   vilains.js          registre des vilains (panneau qui recouvre l'appli)
+  sorts.js            fiche d'un sort, page bibliothèque, tiroir du combat
 Code.gs             le code à coller dans le Sheet
 ```
 
+Chaque page est un HTML minimal qui charge `js/pages/<page>.js`. Ce fichier appelle `demarrerMJ({ actif, extras })` — qui construit la barre, la connexion et le tracker de combat — puis monte ses propres panneaux. Le mode démo est gardé le temps de l'onglet : on peut passer d'une page à l'autre sans le perdre.
+
 Le principe : les vues ne se parlent jamais entre elles. Elles appellent une fonction du store, le store prévient tout le monde, chaque vue se redessine. Pour ajouter un panneau, écris un `monterMachin(racine)` qui fait `store.abonner(rendre)`.
+
+## Mise à jour depuis l'étape 1 (vilains, rencontres)
+
+Rien ne change côté Sheet. Côté site :
+
+1. **Supprime `js/app.js`** — il est remplacé par `js/pages/codex.js`. S'il reste, il ne gêne pas mais il traîne.
+2. Ajoute `graphe.html`, `sorts.html`, le dossier `data/`, `js/mj.js`, `js/sorts-store.js`, `js/pages/`, `js/views/sorts.js`.
+3. Remplace `index.html`, `css/style.css`, `js/views/graphe.js`, `js/views/combat.js`.
 
 ## Mise à jour depuis la version « combat »
 

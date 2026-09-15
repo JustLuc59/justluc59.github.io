@@ -1,18 +1,24 @@
 /**
- * Colonne de droite : le réseau.
- * Cytoscape est chargé depuis un CDN dans index.html (variable globale `cytoscape`).
+ * Le réseau des fiches (page Graphe).
+ * Cytoscape est chargé depuis un CDN dans graphe.html (variable globale `cytoscape`).
+ *
+ * Renvoie quelques commandes pour la page : filtrer les types, recentrer,
+ * centrer sur un nœud.
  */
 
 import { TYPES } from '../config.js';
 import * as store from '../store.js';
 
-export function monterGraphe(racine) {
+export function monterGraphe(racine, { auDoubleClic } = {}) {
+  const rien = { filtrerTypes() {}, recentrer() {}, centrerSur() {} };
   if (typeof cytoscape === 'undefined') {
     racine.innerHTML = `<div class="vide vide--grand">
       <p>Le graphe n’a pas pu se charger. Vérifie ta connexion, puis recharge la page.</p>
     </div>`;
-    return;
+    return rien;
   }
+
+  let typesVisibles = Object.keys(TYPES);
 
   const reseau = cytoscape({
     container: racine,
@@ -66,29 +72,31 @@ export function monterGraphe(racine) {
   });
 
   reseau.on('tap', 'node', (e) => store.selectionner(e.target.id()));
+  if (auDoubleClic) reseau.on('dbltap', 'node', (e) => auDoubleClic(e.target.id()));
 
   let signaturePrecedente = '';
 
   function rendre(etat) {
-    const signature = signatureDesDonnees(etat);
+    const signature = signatureDesDonnees(etat) + '#' + typesVisibles.join(',');
 
     // On ne reconstruit (et ne relance la mise en place) que si les données changent.
     if (signature !== signaturePrecedente) {
       signaturePrecedente = signature;
       reseau.elements().remove();
+      const entites = etat.entites.filter((e) => typesVisibles.includes(e.type));
       reseau.add([
-        ...etat.entites.map((e) => ({
+        ...entites.map((e) => ({
           data: { id: e.id, nom: e.nom || 'Sans nom', couleur: (TYPES[e.type] || {}).couleur || '#8E99A6' },
         })),
         ...etat.relations
-          .filter((r) => etat.entites.some((e) => e.id === r.source) && etat.entites.some((e) => e.id === r.cible))
+          .filter((r) => entites.some((e) => e.id === r.source) && entites.some((e) => e.id === r.cible))
           .map((r) => ({ data: { id: r.id, source: r.source, target: r.cible, type: r.type || '' } })),
       ]);
       reseau.layout({
         name: 'cose',
         animate: false,
-        nodeRepulsion: 9000,
-        idealEdgeLength: 110,
+        nodeRepulsion: 20000,
+        idealEdgeLength: 150,
         padding: 30,
       }).run();
     }
@@ -123,4 +131,13 @@ export function monterGraphe(racine) {
 
   // Le graphe doit se recalculer quand le panneau change de taille.
   new ResizeObserver(() => reseau.resize()).observe(racine);
+
+  return {
+    filtrerTypes(types) { typesVisibles = types; rendre(store.lire()); },
+    recentrer() { reseau.fit(undefined, 30); },
+    centrerSur(id) {
+      const noeud = reseau.getElementById(id);
+      if (noeud.length) reseau.animate({ center: { eles: noeud }, zoom: Math.max(reseau.zoom(), 1) }, { duration: 250 });
+    },
+  };
 }

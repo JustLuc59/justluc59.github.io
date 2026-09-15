@@ -1,0 +1,20 @@
+[
+  {
+    "id": "exemple-perso",
+    "nom": "Exemple de sort perso",
+    "niveau": 1,
+    "ecole": "Évocation",
+    "classes": [
+      "Magicien"
+    ],
+    "incantation": "1 action",
+    "portee": "18 mètres",
+    "composantes": "VS",
+    "materiel": "",
+    "duree": "Instantanée",
+    "concentration": false,
+    "rituel": false,
+    "description": "Supprime cette entrée et ajoute les tiennes sur le même modèle. Ce fichier n'est jamais écrasé par une mise à jour du SRD.",
+    "niveaux_superieurs": ""
+  }
+]

@@ -5,6 +5,7 @@ import * as store from '../store.js';
 import * as combat from '../combat-store.js';
 import { pastille } from './pastille.js';
 import { echapper } from './liste.js';
+import { gabaritRechercheSort, brancherRechercheSort } from './sorts.js';
 
 export function monterCombat(racine) {
   function rendre(etat) {
@@ -28,6 +29,8 @@ export function monterCombat(racine) {
         </div>
       </div>
 
+      ${gabaritRechercheSort()}
+
       ${etat.combattants.length
         ? `<ol class="combat-liste">${etat.combattants.map((c, i) => ligne(c, i === etat.tour)).join('')}</ol>`
         : `<p class="vide vide--grand">Aucun combattant. Ajoute-les ci-dessous.</p>`}
@@ -36,6 +39,7 @@ export function monterCombat(racine) {
     `;
 
     brancher(racine);
+    brancherRechercheSort(racine);
 
     // Garde le combattant actif visible quand la liste est longue.
     racine.querySelector('.combattant--actif')?.scrollIntoView({ block: 'nearest' });
