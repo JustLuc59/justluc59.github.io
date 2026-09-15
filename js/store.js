@@ -5,6 +5,13 @@
 
 import { appeler } from './api.js';
 
+/**
+ * Copie locale des données. Elle est affichée dès l'ouverture d'une page,
+ * pendant que le Sheet est relu en arrière-plan : changer de page est
+ * instantané. Le Sheet reste la référence — la copie n'est qu'un cache.
+ */
+const CLE_CACHE = 'mj-codex:cache';
+
 const etat = {
   entites: [],
   relations: [],
@@ -95,9 +102,39 @@ export async function charger() {
     etat.entites = donnees.entites;
     etat.relations = donnees.relations;
     etat.demo = false;
+    conserverCache();
   } finally {
     etat.occupe = false;
     diffuser();
+  }
+}
+
+/** Affiche la dernière copie connue, sans réseau. Renvoie true si elle existait. */
+export function restaurerCache() {
+  try {
+    const copie = JSON.parse(localStorage.getItem(CLE_CACHE) || 'null');
+    if (!copie || !Array.isArray(copie.entites)) return false;
+    etat.entites = copie.entites;
+    etat.relations = copie.relations || [];
+    etat.demo = false;
+    diffuser();
+    return true;
+  } catch (err) {
+    console.warn('Copie locale illisible, on relit le Sheet.', err);
+    return false;
+  }
+}
+
+export function oublierCache() {
+  try { localStorage.removeItem(CLE_CACHE); } catch (err) { /* rien à faire */ }
+}
+
+function conserverCache() {
+  if (etat.demo) return;
+  try {
+    localStorage.setItem(CLE_CACHE, JSON.stringify({ entites: etat.entites, relations: etat.relations }));
+  } catch (err) {
+    console.warn('Copie locale non conservée (trop volumineuse ?).', err);
   }
 }
 
@@ -107,6 +144,7 @@ export async function enregistrerEntite(entite) {
     : await appeler('enregistrerEntite', entite);
   remplacer(etat.entites, enregistree);
   etat.selection = enregistree.id;
+  conserverCache();
   diffuser();
   return enregistree;
 }
@@ -116,6 +154,7 @@ export async function supprimerEntite(id) {
   etat.entites = etat.entites.filter((e) => e.id !== id);
   etat.relations = etat.relations.filter((r) => r.source !== id && r.cible !== id);
   if (etat.selection === id) etat.selection = null;
+  conserverCache();
   diffuser();
 }
 
@@ -124,6 +163,7 @@ export async function enregistrerRelation(relation) {
     ? { ...relation, id: relation.id || idLocal('r') }
     : await appeler('enregistrerRelation', relation);
   remplacer(etat.relations, enregistree);
+  conserverCache();
   diffuser();
   return enregistree;
 }
@@ -131,6 +171,7 @@ export async function enregistrerRelation(relation) {
 export async function supprimerRelation(id) {
   if (!etat.demo) await appeler('supprimerRelation', { id });
   etat.relations = etat.relations.filter((r) => r.id !== id);
+  conserverCache();
   diffuser();
 }
 
