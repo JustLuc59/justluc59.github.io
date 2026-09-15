@@ -86,6 +86,7 @@ export function demarrerMJ({ actif, extras = [] }) {
     e.preventDefault();
     api.ecrireReglages({ url: formulaire.url.value.trim(), cle: formulaire.cle.value.trim() });
     sessionStorage.removeItem(CLE_DEMO);
+    store.oublierCache(); // on change de Sheet : la copie locale ne vaut plus rien
     dialogue.close();
     await rafraichir();
   };
@@ -103,12 +104,14 @@ export function demarrerMJ({ actif, extras = [] }) {
       annoncer('Aucun Sheet connecté. Ouvre Connexion, ou clique sur Démo pour essayer.', 'info');
       return;
     }
+    // La copie locale s'affiche tout de suite ; le Sheet est relu derrière.
+    const dejaAffiche = store.restaurerCache();
     try {
-      annoncer('Lecture du Sheet…', 'info');
+      annoncer(dejaAffiche ? 'Synchronisation avec le Sheet…' : 'Lecture du Sheet…', 'info');
       await store.charger();
       annoncer('', 'info');
     } catch (err) {
-      annoncer(err.message);
+      annoncer(dejaAffiche ? `${err.message} Les données affichées sont la dernière copie locale.` : err.message);
     }
   }
 
