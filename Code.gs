@@ -12,6 +12,14 @@
 // Change cette valeur par une phrase à toi. Elle est demandée par l'appli.
 const CLE_PARTAGEE = 'change-moi-avant-de-deployer';
 
+// Code donné aux joueurs pour joueur.html. Il ne permet que de lire sa propre
+// fiche et d'y modifier les champs listés dans CHAMPS_JOUEUR_MODIFIABLES.
+// Ce n'est pas un mot de passe : quelqu'un qui l'a peut lire toutes les fiches
+// de type joueur. Ne mets rien de secret dans une fiche joueur.
+const CODE_JOUEUR = 'change-moi-aussi';
+
+const CHAMPS_JOUEUR_MODIFIABLES = ['pv_actuel', 'inventaire', 'notes_joueur'];
+
 const ONGLETS = {
   // Les colonnes de combat sont volontairement placées APRÈS 'maj' :
   // relancer initialiser() sur un Sheet déjà rempli ne décale alors rien.
@@ -28,8 +36,14 @@ const ONGLETS = {
     'competences', 'sens', 'langues', 'resistances', 'immunites', 'vulnerabilites',
     'immunites_etats', 'capacites', 'actions', 'actions_bonus', 'reactions',
     'actions_legendaires',
+    // Joueurs
+    'race', 'classe', 'pv_actuel', 'inventaire', 'notes_joueur',
   ],
   relations: ['id', 'source', 'cible', 'type', 'note', 'maj'],
+  // Calendrier : un événement par ligne. `fiche` = id d'une fiche liée (optionnel).
+  evenements: ['id', 'jour', 'mois', 'annee', 'titre', 'note', 'fiche', 'maj'],
+  // Réglages divers, une paire clé/valeur par ligne (ex. : date du jour).
+  reglages: ['cle', 'valeur'],
 };
 
 /** Crée les onglets et les en-têtes s'ils n'existent pas. À lancer une fois. */
@@ -57,11 +71,11 @@ function doPost(e) {
     return reponse({ ok: false, erreur: 'Requête illisible.' });
   }
 
-  if (requete.cle !== CLE_PARTAGEE) {
-    return reponse({ ok: false, erreur: 'Clé refusée.' });
-  }
+  let action;
+  if (requete.cle === CLE_PARTAGEE) action = ACTIONS[requete.action];
+  else if (requete.cle === CODE_JOUEUR) action = ACTIONS_JOUEUR[requete.action];
+  else return reponse({ ok: false, erreur: 'Clé refusée.' });
 
-  const action = ACTIONS[requete.action];
   if (!action) {
     return reponse({ ok: false, erreur: 'Action inconnue : ' + requete.action });
   }
@@ -81,7 +95,31 @@ function doPost(e) {
 const ACTIONS = {
   /** Renvoie tout le contenu du classeur. */
   charger: function () {
-    return { entites: lire('entites'), relations: lire('relations') };
+    return {
+      entites: lire('entites'),
+      relations: lire('relations'),
+      evenements: lireSiExiste('evenements'),
+      reglages: lireReglages(),
+    };
+  },
+
+  enregistrerEvenement: function (contenu) {
+    return enregistrer('evenements', contenu, 'v');
+  },
+
+  supprimerEvenement: function (contenu) {
+    supprimer('evenements', contenu.id);
+    return { id: contenu.id };
+  },
+
+  /** Écrit une valeur de réglage (ex. : { cle: 'aujourdhui', valeur: '{"jour":3,...}' }). */
+  ecrireReglage: function (contenu) {
+    const feuille = onglet('reglages');
+    const index = indexDeLigne(feuille, contenu.cle);
+    const ligne = [contenu.cle, contenu.valeur == null ? '' : String(contenu.valeur)];
+    if (index === -1) feuille.appendRow(ligne);
+    else feuille.getRange(index, 1, 1, 2).setValues([ligne]);
+    return { cle: contenu.cle, valeur: ligne[1] };
   },
 
   /** Crée ou met à jour une entité. */
@@ -108,9 +146,48 @@ const ACTIONS = {
   },
 };
 
+/** Ce que les joueurs peuvent faire avec CODE_JOUEUR. Rien d'autre. */
+const ACTIONS_JOUEUR = {
+  /** Liste des personnages joueurs, pour choisir le sien. */
+  listerJoueurs: function () {
+    return lire('entites')
+      .filter(function (e) { return e.type === 'joueur'; })
+      .map(function (e) { return { id: e.id, nom: e.nom, resume: e.resume }; });
+  },
+
+  /** Une fiche joueur complète, plus la date du jour. */
+  lireJoueur: function (contenu) {
+    const fiche = lire('entites').filter(function (e) { return e.id === contenu.id && e.type === 'joueur'; })[0];
+    if (!fiche) throw new Error('Fiche introuvable.');
+    return { fiche: fiche, aujourdhui: lireReglages().aujourdhui || '' };
+  },
+
+  /** Met à jour les seuls champs autorisés d'une fiche joueur. */
+  majJoueur: function (contenu) {
+    const fiche = lire('entites').filter(function (e) { return e.id === contenu.id && e.type === 'joueur'; })[0];
+    if (!fiche) throw new Error('Fiche introuvable.');
+    CHAMPS_JOUEUR_MODIFIABLES.forEach(function (cle) {
+      if (contenu.champs && contenu.champs[cle] != null) fiche[cle] = String(contenu.champs[cle]);
+    });
+    return enregistrer('entites', fiche, 'e');
+  },
+};
+
 // ---------------------------------------------------------------
 // Accès au Sheet
 // ---------------------------------------------------------------
+
+/** Comme lire(), mais renvoie [] si l'onglet n'existe pas encore. */
+function lireSiExiste(nom) {
+  return SpreadsheetApp.getActive().getSheetByName(nom) ? lire(nom) : [];
+}
+
+/** L'onglet reglages sous forme d'objet { cle: valeur }. */
+function lireReglages() {
+  const objet = {};
+  lireSiExiste('reglages').forEach(function (ligne) { objet[ligne.cle] = ligne.valeur; });
+  return objet;
+}
 
 function onglet(nom) {
   const feuille = SpreadsheetApp.getActive().getSheetByName(nom);

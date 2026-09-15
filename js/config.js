@@ -95,6 +95,44 @@ export const CHAMPS_STATBLOC = [
   { cle: 'actions_legendaires', libelle: 'Actions légendaires', zone: true },
 ];
 
+/**
+ * Champs propres aux fiches Joueur. Ceux marqués `joueur: true` sont
+ * modifiables par le joueur lui-même depuis joueur.html ; les autres ne le
+ * sont que par le MJ. Chaque clé doit exister dans `ONGLETS.entites` de Code.gs
+ * ET dans `CHAMPS_JOUEUR_MODIFIABLES` de Code.gs pour ceux du joueur.
+ */
+export const CHAMPS_JOUEUR = [
+  { cle: 'race',         libelle: 'Race / espèce' },
+  { cle: 'classe',       libelle: 'Classe' },
+  { cle: 'pv_actuel',    libelle: 'PV actuels',   joueur: true, nombre: true },
+  { cle: 'inventaire',   libelle: 'Inventaire',   joueur: true, zone: true },
+  { cle: 'notes_joueur', libelle: 'Notes du joueur', joueur: true, zone: true },
+];
+
+/**
+ * Calendrier de la campagne. Change les noms et les durées : tout le reste
+ * (semaine, avance des jours, affichage) suit. Une année = la somme des mois.
+ */
+export const CALENDRIER = {
+  mois: [
+    { nom: 'Givre',       jours: 30 },
+    { nom: 'Dégel',       jours: 30 },
+    { nom: 'Semailles',   jours: 30 },
+    { nom: 'Floraison',   jours: 30 },
+    { nom: 'Foin',        jours: 30 },
+    { nom: 'Moisson',     jours: 30 },
+    { nom: 'Vendanges',   jours: 30 },
+    { nom: 'Brume',       jours: 30 },
+    { nom: 'Frimas',      jours: 30 },
+    { nom: 'Longue-Nuit', jours: 30 },
+    { nom: 'Cendres',     jours: 30 },
+    { nom: 'Aubes',       jours: 30 },
+  ],
+  joursSemaine: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+  suffixeAnnee: 'CV',   // affiché après l'année : 1492 CV
+  dateInitiale: { jour: 1, mois: 0, annee: 1492 },  // si le Sheet n'a encore rien
+};
+
 /** Caractéristiques. Le modificateur est calculé, jamais saisi. */
 export const CARACS = [
   { cle: 'force',        libelle: 'FOR' },

@@ -15,6 +15,8 @@ const CLE_CACHE = 'mj-codex:cache';
 const etat = {
   entites: [],
   relations: [],
+  evenements: [],    // calendrier de campagne
+  reglages: {},      // paires clé/valeur du Sheet (ex. : aujourdhui)
   selection: null,   // id de l'entité affichée
   recherche: '',
   filtreType: 'tous',
@@ -101,6 +103,8 @@ export async function charger() {
     const donnees = await appeler('charger');
     etat.entites = donnees.entites;
     etat.relations = donnees.relations;
+    etat.evenements = donnees.evenements || [];
+    etat.reglages = donnees.reglages || {};
     etat.demo = false;
     conserverCache();
   } finally {
@@ -116,6 +120,8 @@ export function restaurerCache() {
     if (!copie || !Array.isArray(copie.entites)) return false;
     etat.entites = copie.entites;
     etat.relations = copie.relations || [];
+    etat.evenements = copie.evenements || [];
+    etat.reglages = copie.reglages || {};
     etat.demo = false;
     diffuser();
     return true;
@@ -132,7 +138,9 @@ export function oublierCache() {
 function conserverCache() {
   if (etat.demo) return;
   try {
-    localStorage.setItem(CLE_CACHE, JSON.stringify({ entites: etat.entites, relations: etat.relations }));
+    localStorage.setItem(CLE_CACHE, JSON.stringify({
+      entites: etat.entites, relations: etat.relations, evenements: etat.evenements, reglages: etat.reglages,
+    }));
   } catch (err) {
     console.warn('Copie locale non conservée (trop volumineuse ?).', err);
   }
@@ -175,10 +183,39 @@ export async function supprimerRelation(id) {
   diffuser();
 }
 
+// ------------------------------------------------------------- calendrier
+
+export async function enregistrerEvenement(evenement) {
+  const enregistre = etat.demo
+    ? { ...evenement, id: evenement.id || idLocal('v') }
+    : await appeler('enregistrerEvenement', evenement);
+  remplacer(etat.evenements, enregistre);
+  conserverCache();
+  diffuser();
+  return enregistre;
+}
+
+export async function supprimerEvenement(id) {
+  if (!etat.demo) await appeler('supprimerEvenement', { id });
+  etat.evenements = etat.evenements.filter((v) => v.id !== id);
+  conserverCache();
+  diffuser();
+}
+
+/** Écrit un réglage (chaîne). Les objets sont sérialisés en JSON par l'appelant. */
+export async function ecrireReglage(cle, valeur) {
+  if (!etat.demo) await appeler('ecrireReglage', { cle, valeur });
+  etat.reglages = { ...etat.reglages, [cle]: valeur };
+  conserverCache();
+  diffuser();
+}
+
 /** Charge un jeu d'exemple, sans toucher au Sheet. Pratique pour essayer. */
 export function chargerDemo(donnees) {
   etat.entites = donnees.entites;
   etat.relations = donnees.relations;
+  etat.evenements = donnees.evenements || [];
+  etat.reglages = donnees.reglages || {};
   etat.demo = true;
   etat.selection = donnees.entites[0]?.id || null;
   diffuser();

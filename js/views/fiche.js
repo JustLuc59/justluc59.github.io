@@ -5,7 +5,7 @@ import * as store from '../store.js';
 import * as combat from '../combat-store.js';
 import { pastille } from './pastille.js';
 import { echapper } from './liste.js';
-import { blocVilain, blocStatBloc, portrait, badgeRang, formulaireVilain, formulaireStatBloc } from './statbloc.js';
+import { blocVilain, blocStatBloc, blocJoueur, portrait, badgeRang, formulaireVilain, formulaireStatBloc, formulaireJoueur } from './statbloc.js';
 import { blocRencontre, brancherLectureRencontre, formulaireRencontre, brancherFormulaireRencontre } from './rencontre.js';
 
 let enEdition = false;
@@ -54,6 +54,7 @@ export function monterFiche(racine, { signalerErreur }) {
 
         ${combattant ? blocVilain(entite) : ''}
         ${combattant ? blocCombat(entite) : ''}
+        ${blocJoueur(entite)}
         ${combattant ? blocStatBloc(entite) : ''}
         ${entite.type === 'rencontre' ? blocRencontre(entite) : ''}
 
@@ -208,7 +209,8 @@ export function monterFiche(racine, { signalerErreur }) {
                 </label>`).join('')}
             </div>
           </fieldset>
-          ${formulaireVilain(entite)}
+          ${formulaireJoueur(entite)}
+          ${entite.type === 'joueur' ? '' : formulaireVilain(entite)}
           ${formulaireStatBloc(entite)}` : ''}
 
         ${entite.type === 'rencontre' ? formulaireRencontre(entite) : ''}

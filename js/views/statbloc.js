@@ -3,7 +3,7 @@
  * bloc de statistiques complet. Utilisés par `fiche.js` en lecture et en édition.
  */
 
-import { CHAMPS_STATBLOC, RANGS_MENACE, STATUTS_VILAIN, STATUTS_TERMINES, LIENS_SBIRE } from '../config.js';
+import { CHAMPS_STATBLOC, CHAMPS_JOUEUR, RANGS_MENACE, STATUTS_VILAIN, STATUTS_TERMINES, LIENS_SBIRE } from '../config.js';
 import * as store from '../store.js';
 import { pastille } from './pastille.js';
 import { echapper } from './liste.js';
@@ -132,4 +132,45 @@ export function formulaireStatBloc(entite) {
           <textarea class="champ champ--zone" name="${c.cle}" rows="4" placeholder="Une capacité par ligne : Nom. Description">${echapper(entite[c.cle] || '')}</textarea>
         </label>`).join('')}
     </details>`;
+}
+
+// ------------------------------------------------------------- joueur
+
+/** Race, classe, PV actuels, inventaire, notes du joueur — sur une fiche Joueur. */
+export function blocJoueur(entite) {
+  if (entite.type !== 'joueur') return '';
+  const lignes = CHAMPS_JOUEUR.filter((c) => !c.zone && entite[c.cle] !== undefined && entite[c.cle] !== '');
+  const zones = CHAMPS_JOUEUR.filter((c) => c.zone && entite[c.cle]);
+  return `
+    <section class="statbloc">
+      <dl class="statbloc-lignes">
+        ${lignes.map((c) => `<div class="statbloc-ligne"><dt>${c.libelle}</dt><dd>${echapper(entite[c.cle])}${c.cle === 'pv_actuel' && entite.pv_max ? ` <span class="indice">/ ${echapper(entite.pv_max)}</span>` : ''}</dd></div>`).join('')}
+        <div class="statbloc-ligne"><dt>Fiche joueur</dt><dd><a class="lien-fiche" href="joueur.html" target="_blank" rel="noopener">joueur.html</a> <span class="indice">— le joueur y modifie PV, inventaire et notes</span></dd></div>
+      </dl>
+      ${zones.map((c) => `
+        <div class="statbloc-zone">
+          <h3 class="registre-titre">${c.libelle}</h3>
+          <div class="notes">${echapper(entite[c.cle]).replace(/\n/g, '<br>')}</div>
+        </div>`).join('')}
+    </section>`;
+}
+
+export function formulaireJoueur(entite) {
+  if (entite.type !== 'joueur') return '';
+  const lignes = CHAMPS_JOUEUR.filter((c) => !c.zone);
+  const zones = CHAMPS_JOUEUR.filter((c) => c.zone);
+  return `
+    <fieldset class="groupe">
+      <legend class="registre-titre">Joueur <span class="indice">les champs marqués ✎ sont aussi modifiables par le joueur</span></legend>
+      <div class="grille-saisie">
+        ${lignes.map((c) => `
+          <label class="etiquette etiquette--serree">${c.libelle}${c.joueur ? ' ✎' : ''}
+            <input class="champ" name="${c.cle}" type="${c.nombre ? 'number' : 'text'}" value="${echapper(entite[c.cle] || '')}">
+          </label>`).join('')}
+      </div>
+      ${zones.map((c) => `
+        <label class="etiquette" style="margin-top:12px">${c.libelle}${c.joueur ? ' ✎' : ''}
+          <textarea class="champ champ--zone" name="${c.cle}" rows="4">${echapper(entite[c.cle] || '')}</textarea>
+        </label>`).join('')}
+    </fieldset>`;
 }

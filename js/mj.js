@@ -19,6 +19,7 @@ const PAGES = [
   { id: 'codex',  libelle: 'Codex',  lien: 'index.html' },
   { id: 'graphe', libelle: 'Graphe', lien: 'graphe.html' },
   { id: 'sorts',  libelle: 'Sorts',  lien: 'sorts.html' },
+  { id: 'calendrier', libelle: 'Calendrier', lien: 'calendrier.html' },
 ];
 
 const CLE_DEMO = 'mj-codex:demo';
