@@ -78,15 +78,20 @@ export function vider() {
 /** Ajoute une entité du codex. `nb > 1` crée « Gobelin 1 », « Gobelin 2 »… */
 export function ajouterDepuisFiche(entite, nb = 1) {
   const pvMax = nombre(entite.pv_max);
+  // Un joueur arrive avec ses PV actuels (ceux de sa fiche joueur), pas ses PV max.
+  const pv = entite.type === 'joueur' && entite.pv_actuel !== '' && entite.pv_actuel != null
+    ? nombre(entite.pv_actuel) : pvMax;
   for (let i = 0; i < nb; i++) {
-    etat.combattants.push(construire({
+    const c = construire({
       entiteId: entite.id,
       nom: nb > 1 ? `${entite.nom} ${i + 1}` : entite.nom,
       type: entite.type,
       ca: nombre(entite.ca),
       pvMax,
       modDex: modificateur(entite.dexterite),
-    }));
+    });
+    c.pv = pv;
+    etat.combattants.push(c);
   }
   diffuser();
 }
